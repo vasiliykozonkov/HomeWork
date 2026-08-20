@@ -23,6 +23,6 @@ public class Student {
 
 	@Override
 	public String toString() {
-		return "Student{" + name + ", " + age + " лет, книг: " + books.size() + "}";
+		return "Студент " + name + ", " + age + " лет, книг: " + books.size() + "";
 	}
 }
