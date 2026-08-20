@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.Optional;
-
+// FIXME: Main application entry point
+// TODO: Add error handling
 public class LibraryApp {
 	public static void main(String[] args) {
 		FileReaderService readerService = new FileReaderService();

@@ -5,7 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
+// FIXME: Add validation
+// TODO: Support multiple file formats
 public class FileReaderService {
     private static final String STUDENTS_FILE = "students.txt";
 

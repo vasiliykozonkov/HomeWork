@@ -3,7 +3,8 @@ public class Book {
 	private String author;
 	private int year;
 	private int pages;
-
+	// FIXME: Add validation
+// TODO: Support multiple file formats
 	public Book(String title, String author, int year, int pages) {
 		this.title = title;
 		this.author = author;
