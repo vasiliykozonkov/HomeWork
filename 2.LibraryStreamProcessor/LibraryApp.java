@@ -17,6 +17,9 @@ public class LibraryApp {
 
 			while ((line = reader.readLine()) != null) {
 				String[] parts = line.split("\\|");
+				for (int i = 0; i < parts.length; i++) {
+					parts[i] = parts[i].trim();
+				}
 
 				if (parts[0].equals("Студент")) {
 					if (currentStudent != null) {
@@ -52,6 +55,8 @@ public class LibraryApp {
 		students.forEach(student -> {
 			System.out.println(student);
 			student.getBooks().stream()
+			.distinct()
+			.filter(book -> book.getYear() > 2000)
 			.sorted((b1, b2) -> Integer.compare(b1.getPages(), b2.getPages()))
 			.forEach(book -> System.out.println("Книга: " + book));
 		});
