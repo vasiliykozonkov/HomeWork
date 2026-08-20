@@ -1,7 +1,6 @@
 import java.util.List;
 import java.util.Optional;
-// FIXME: Add logging
-// TODO: Add statistics
+
 public class LibraryProcessor {
 
     private static final int MIN_YEAR = 2000;
