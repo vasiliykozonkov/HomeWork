@@ -1,0 +1,7 @@
+Main.class
+CryptoPaymentAdapter.class
+OnlineStore.class
+CryptoPaymentGateway.class
+CryptoPaymentGateway$TransactionResult.class
+PaymentProcessor.class
+SimplePayment.class
