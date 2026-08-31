@@ -1,5 +1,5 @@
 public class DeadLockSolution {
-    // Те же два объекта-ресурса
+	
     private static final Object resourceA = new Object();
     private static final Object resourceB = new Object();
 
@@ -7,7 +7,6 @@ public class DeadLockSolution {
         System.out.println("✅ РЕШЕНИЕ DEADLOCK: Упорядочивание блокировок");
         System.out.println("Оба потока захватывают ресурсы в ОДИНАКОВОМ порядке: сначала A, потом B.\n");
 
-        // Поток 1: захватывает A, потом B
         Thread thread1 = new Thread(() -> {
             synchronized (resourceA) {
                 System.out.println("Поток 1: захватил ресурс A");
@@ -19,7 +18,6 @@ public class DeadLockSolution {
             }
         });
 
-        // Поток 2: захватывает A, потом B (ВАЖНО: тот же порядок!)
         Thread thread2 = new Thread(() -> {
             synchronized (resourceA) {
                 System.out.println("Поток 2: захватил ресурс A");

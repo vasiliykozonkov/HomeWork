@@ -1,9 +1,7 @@
 public class LiveLockWithFlags {
-    // Общий счётчик попыток и лимит
     static int attempts = 0;
     static final int MAX_ATTEMPTS = 10;
     
-    // Флаги "вежливости"
     static boolean isThread1Polite = true;
     static boolean isThread2Polite = true;
 
@@ -11,29 +9,26 @@ public class LiveLockWithFlags {
         System.out.println(" LIVELOCK через synchronized и флаги (ручной способ)");
         System.out.println("Потоки работают, но постоянно уступают друг другу.\n");
 
-        // Поток 1
         Thread t1 = new Thread(() -> {
             while (attempts < MAX_ATTEMPTS) {
                 synchronized (LiveLockWithFlags.class) {
                     attempts++;
                     System.out.println("Поток 1: Попытка №" + attempts);
                     
-                    // Если второй поток тоже "вежливый", уступаем ему
                     if (isThread2Polite) {
                         System.out.println("Поток 1: Вижу, Поток 2 готов. Уступаю ему...");
-                        isThread1Polite = false; // типа "я занят/уступаю"
+                        isThread1Polite = false;
                         try { Thread.sleep(50); } catch (InterruptedException e) {}
                         isThread1Polite = true;
                     } else {
                         System.out.println("Поток 1: О, второй уступил! Делаю полезную работу!");
-                        isThread2Polite = false; // останавливаем цикл второго потока
+                        isThread2Polite = false;
                     }
                 }
             }
             System.out.println("Поток 1: Лимит попыток исчерпан, завершаюсь.");
         });
 
-        // Поток 2
         Thread t2 = new Thread(() -> {
             while (attempts < MAX_ATTEMPTS) {
                 synchronized (LiveLockWithFlags.class) {
@@ -41,7 +36,6 @@ public class LiveLockWithFlags {
                     
                     System.out.println("Поток 2: Попытка №" + attempts);
                     
-                    // Если первый поток тоже "вежливый", уступаем ему
                     if (isThread1Polite) {
                         System.out.println("Поток 2: Вижу, Поток 1 готов. Уступаю ему...");
                         isThread2Polite = false;

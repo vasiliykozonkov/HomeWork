@@ -2,7 +2,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.TimeUnit;
 
 public class DeadLockWithTimeout {
-    // Создаем явные замки вместо обычных объектов
     private static final ReentrantLock lockA = new ReentrantLock();
     private static final ReentrantLock lockB = new ReentrantLock();
 
@@ -10,7 +9,6 @@ public class DeadLockWithTimeout {
         System.out.println("⏳ DEADLOCK с таймаутом (ReentrantLock)");
         System.out.println("Потоки будут пытаться захватить ресурсы, но сдадутся через 2 секунды.\n");
 
-        // Поток 1
         Thread thread1 = new Thread(() -> {
             try {
                 System.out.println("Поток 1: захватываю Lock A...");
@@ -19,7 +17,6 @@ public class DeadLockWithTimeout {
                 Thread.sleep(100); // Имитация работы
 
                 System.out.println("Поток 1: пытаюсь захватить Lock B (жду 2 сек)...");
-                // Пытаемся захватить второй замок с таймаутом!
                 boolean gotLockB = lockB.tryLock(2, TimeUnit.SECONDS);
 
                 if (gotLockB) {
@@ -31,7 +28,6 @@ public class DeadLockWithTimeout {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } finally {
-                // Обязательно освобождаем замок, если мы его держим
                 if (lockA.isHeldByCurrentThread()) {
                     lockA.unlock();
                     System.out.println("Поток 1: освободил Lock A");
@@ -39,16 +35,14 @@ public class DeadLockWithTimeout {
             }
         });
 
-        // Поток 2
         Thread thread2 = new Thread(() -> {
             try {
                 System.out.println("Поток 2: захватываю Lock B...");
-                lockB.lock(); // Захватываем первый замок
+                lockB.lock();
                 System.out.println("Поток 2: Lock B захвачен!");
                 Thread.sleep(100); // Имитация работы
 
                 System.out.println("Поток 2: пытаюсь захватить Lock A (жду 2 сек)...");
-                // Пытаемся захватить второй замок с таймаутом!
                 boolean gotLockA = lockA.tryLock(2, TimeUnit.SECONDS);
 
                 if (gotLockA) {
@@ -60,7 +54,6 @@ public class DeadLockWithTimeout {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } finally {
-                // Обязательно освобождаем замок, если мы его держим
                 if (lockB.isHeldByCurrentThread()) {
                     lockB.unlock();
                     System.out.println("Поток 2: освободил Lock B");

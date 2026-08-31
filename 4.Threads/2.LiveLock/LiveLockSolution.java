@@ -10,7 +10,6 @@ public class LiveLockSolution {
         System.out.println("✅ РЕШЕНИЕ LIVELOCK: Случайные задержки (Random Backoff)");
         System.out.println("Добавляем случайную паузу, чтобы рассинхронизировать потоки.\n");
 
-        // Поток 1
         Thread thread1 = new Thread(() -> {
             int attempts = 0;
             while (attempts < 10) {
@@ -19,13 +18,12 @@ public class LiveLockSolution {
 
                 if (lockA.tryLock()) {
                     try {
-                        // Случайная задержка внутри, чтобы сбить ритм
                         try { Thread.sleep(random.nextInt(100)); } catch (InterruptedException e) { return; }
 
                         if (lockB.tryLock()) {
                             try {
                                 System.out.println("🎉 Поток 1: Захватил оба замка! Работа выполнена.");
-                                return; // Успех, выходим
+                                return;
                             } finally {
                                 lockB.unlock();
                             }
@@ -35,13 +33,11 @@ public class LiveLockSolution {
                     }
                 }
                 
-                // ✅ ГЛАВНОЕ РЕШЕНИЕ: Случайная задержка перед следующей попыткой
                 try { Thread.sleep(random.nextInt(200)); } catch (InterruptedException e) { return; }
             }
             System.out.println("Поток 1: Не успел за 10 попыток.");
         });
 
-        // Поток 2
         Thread thread2 = new Thread(() -> {
             int attempts = 0;
             while (attempts < 10) {
@@ -55,7 +51,7 @@ public class LiveLockSolution {
                         if (lockA.tryLock()) {
                             try {
                                 System.out.println("🎉 Поток 2: Захватил оба замка! Работа выполнена.");
-                                return; // Успех, выходим
+                                return;
                             } finally {
                                 lockA.unlock();
                             }
@@ -65,7 +61,6 @@ public class LiveLockSolution {
                     }
                 }
                 
-                // ✅ ГЛАВНОЕ РЕШЕНИЕ: Случайная задержка перед следующей попыткой
                 try { Thread.sleep(random.nextInt(200)); } catch (InterruptedException e) { return; }
             }
             System.out.println("Поток 2: Не успел за 10 попыток.");
