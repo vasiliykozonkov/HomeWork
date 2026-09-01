@@ -1,9 +1,13 @@
 public class ExpressDeliveryDecorator extends OrderDecorator {
-	public ExpressDeliveryDecorator(Order order) {
-		super(order);
-	}
-	public void process() {
-		super.process();
-		if ("Экспресс".equals(order.getDeliveryType())) System.out.println("   ⚡ Оформляем экспресс-доставку (+500 руб.)");
-	}
+    public ExpressDeliveryDecorator(Order order) {
+        super(order);
+    }
+
+    @Override
+    public void process() {
+        super.process();
+        if (order.getDeliveryType() == DeliveryType.EXPRESS) {
+            System.out.println("   ⚡ Оформляем экспресс-доставку (+500 руб.)");
+        }
+    }
 }

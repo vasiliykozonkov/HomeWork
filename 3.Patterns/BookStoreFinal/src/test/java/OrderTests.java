@@ -1,65 +1,66 @@
 import org.junit.jupiter.api.Test;
+import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTests {
 
-	@Test
-	public void testOrderBuilder_MinimalOrder() {
-		Order order = new Order.Builder("Василий").build();
+    @Test
+    public void testOrderBuilder_MinimalOrder() {
+        Order order = Order.builder("Василий").build();
 
-		assertNotNull(order);
-		assertEquals("Василий", order.getCustomerName());
-		assertEquals("Стандартная", order.getDeliveryType());
-		assertFalse(order.isGiftWrap());
-		assertFalse(order.isInsurance());
-	}
+        assertNotNull(order);
+        assertEquals("Василий", order.getCustomerName());
+        assertEquals(DeliveryType.STANDARD, order.getDeliveryType());
+        assertFalse(order.isGiftWrap());
+        assertFalse(order.isInsurance());
+        assertEquals(BigDecimal.ZERO, order.getTotalAmount());
+    }
 
-	@Test
-	public void testOrderBuilder_WithBooks() {
-		Book book1 = new Book("Война и мир", "Толстой", 1869, 800, 5);
-		Book book2 = new Book("1984", "Оруэлл", 1949, 450, 3);
+    @Test
+    public void testOrderBuilder_WithBooks() {
+        Book book1 = new Book("Война и мир", "Толстой", 1869, new BigDecimal("800"), 5);
+        Book book2 = new Book("1984", "Оруэлл", 1949, new BigDecimal("450"), 3);
 
-		Order order = new Order.Builder("Петя")
-		.addBook(book1)
-		.addBook(book2)
-		.build();
+        Order order = Order.builder("Петя")
+                .addBook(book1)
+                .addBook(book2)
+                .build();
 
-		assertEquals(2, order.getBooks().size());
-		assertEquals(1250.0, order.getTotalAmount(), 0.01); // 800 + 450
-	}
+        assertEquals(2, order.getBooks().size());
+        assertEquals(new BigDecimal("1250"), order.getTotalAmount());
+    }
 
-	@Test
-	public void testOrderBuilder_WithGiftWrap() {
-		Book book = new Book("Java для начинающих", "Смит", 2023, 900, 10);
+    @Test
+    public void testOrderBuilder_WithGiftWrap() {
+        Book book = new Book("Java для начинающих", "Смит", 2023, new BigDecimal("900"), 10);
 
-		Order order = new Order.Builder("Маша")
-		.addBook(book)
-		.withGiftWrap(true)
-		.build();
+        Order order = Order.builder("Маша")
+                .addBook(book)
+                .giftWrap(true)
+                .build();
 
-		assertTrue(order.isGiftWrap());
-		assertEquals(1100.0, order.getTotalAmount(), 0.01); // 900 + 200
-	}
+        assertTrue(order.isGiftWrap());
+        assertEquals(new BigDecimal("1100"), order.getTotalAmount());
+    }
 
-	@Test
-	public void testOrderBuilder_FullOrder() {
-		Book book1 = new Book("Война и мир", "Толстой", 1869, 800, 5);
-		Book book2 = new Book("1984", "Оруэлл", 1949, 450, 3);
+    @Test
+    public void testOrderBuilder_FullOrder() {
+        Book book1 = new Book("Война и мир", "Толстой", 1869, new BigDecimal("800"), 5);
+        Book book2 = new Book("1984", "Оруэлл", 1949, new BigDecimal("450"), 3);
 
-		Order order = new Order.Builder("Василий Козонков")
-		.addBook(book1)
-		.addBook(book2)
-		.setDeliveryType("Экспресс")
-		.withGiftWrap(true)
-		.withInsurance(true)
-		.build();
+        Order order = Order.builder("Василий Козонков")
+                .addBook(book1)
+                .addBook(book2)
+                .deliveryType(DeliveryType.EXPRESS)
+                .giftWrap(true)
+                .insurance(true)
+                .build();
 
-		assertEquals(2, order.getBooks().size());
-		assertTrue(order.isGiftWrap());
-		assertTrue(order.isInsurance());
-		assertEquals("Экспресс", order.getDeliveryType());
+        assertEquals(2, order.getBooks().size());
+        assertTrue(order.isGiftWrap());
+        assertTrue(order.isInsurance());
+        assertEquals(DeliveryType.EXPRESS, order.getDeliveryType());
 
-		// 800 + 450 = 1250, +200 упаковка = 1450, +5% страховка (72.5) = 1522.5, +500 экспресс = 2022.5
-		assertEquals(2022.5, order.getTotalAmount(), 0.01);
-	}
+        assertEquals(new BigDecimal("2022.50"), order.getTotalAmount());
+    }
 }

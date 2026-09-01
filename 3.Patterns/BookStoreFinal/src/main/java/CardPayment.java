@@ -1,9 +1,14 @@
+import java.math.BigDecimal;
+
 public class CardPayment implements PaymentStrategy {
-	public boolean pay(double amount) {
-		System.out.println("    💳 Оплата картой: " + String.format("%.2f", amount) + " руб.");
-		return true;
-	}
-	public String getMethodName() {
-		return "Банковская карта";
-	}
+    @Override
+    public boolean pay(BigDecimal amount) {
+        System.out.println("    💳 Оплата картой: " + amount + " руб.");
+        return true;
+    }
+
+    @Override
+    public String getMethodName() {
+        return "Банковская карта";
+    }
 }

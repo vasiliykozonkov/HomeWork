@@ -1,9 +1,0 @@
-SortByPagesStrategy.class
-SortByTitleStrategy.class
-SortByYearStrategy.class
-FileReaderService.class
-LibraryApp.class
-Student.class
-LibraryProcessor.class
-Book.class
-BookSortingStrategy.class

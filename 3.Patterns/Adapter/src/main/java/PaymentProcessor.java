@@ -1,4 +1,10 @@
+package com.HomeWork;
+
+import java.math.BigDecimal;
+
 public interface PaymentProcessor {
-	boolean pay(double amount, String currency);
-	String getPaymentStatus();
+
+    boolean pay(BigDecimal amount, String currency);
+
+    String getPaymentStatus();
 }
