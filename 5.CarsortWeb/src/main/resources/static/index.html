@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Автосалон с визуализацией кода</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .car-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .car-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .car-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .car-card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .code-panel {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .code-line {
+            padding: 4px 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #d4d4d4;
+        }
+
+        .code-line.active {
+            background: rgba(255, 215, 0, 0.3);
+            border-left-color: #ffd700;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+            display: inline-block;
+            width: 30px;
+            text-align: right;
+        }
+
+        .step-description {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            color: #856404;
+            font-size: 16px;
+            min-height: 60px;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .speed-control {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .speed-control button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .speed-control button.active {
+            background: #28a745;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .algorithm-info {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🚗 Автосалон с визуализацией кода</h1>
+
+    <div class="main-layout">
+        <!-- Левая панель: Автомобили -->
+        <div class="panel">
+            <h2>🚘 Автомобили</h2>
+
+            <div class="controls">
+                <button onclick="loadCars()">🔄 Загрузить</button>
+                <button onclick="startSort('bubble')">⚡ Bubble Sort</button>
+                <button onclick="startSort('selection')">🎯 Selection Sort</button>
+                <button onclick="startSort('insertion')">📥 Insertion Sort</button>
+            </div>
+
+            <div id="carList" class="car-list"></div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">➕ Добавить автомобиль</h3>
+            <div class="form-group">
+                <label>Модель:</label>
+                <input type="text" id="carModel" placeholder="Например: Toyota">
+            </div>
+            <div class="form-group">
+                <label>Мощность (л.с.):</label>
+                <input type="number" id="carPower" placeholder="150">
+            </div>
+            <div class="form-group">
+                <label>Год:</label>
+                <input type="number" id="carYear" placeholder="2020">
+            </div>
+            <button onclick="addCar()">Добавить</button>
+        </div>
+
+        <!-- Правая панель: Код -->
+        <div class="panel">
+            <h2> Выполняемый код</h2>
+
+            <div id="algorithmInfo" class="algorithm-info" style="display: none;"></div>
+
+            <div class="playback-controls">
+                <button id="playBtn" onclick="togglePlay()" disabled>▶️ Play</button>
+                <button id="stepBtn" onclick="nextStep()" disabled>⏭️ Шаг</button>
+                <button id="resetBtn" onclick="resetSort()" disabled>🔄 Сброс</button>
+
+                <div class="speed-control">
+                    <button onclick="setSpeed(1000)" id="slowBtn">🐢 Медленно</button>
+                    <button onclick="setSpeed(500)" id="normalBtn" class="active">⚡ Нормально</button>
+                    <button onclick="setSpeed(100)" id="fastBtn">🚀 Быстро</button>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div id="stepDescription" class="step-description">
+                Нажмите кнопку сортировки для начала...
+            </div>
+
+            <div id="codePanel" class="code-panel"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cars = [];
+    let currentSteps = [];
+    let currentStepIndex = 0;
+    let isPlaying = false;
+    let playInterval = null;
+    let speed = 500;
+    let currentAlgorithm = '';
+
+    // Код для каждого алгоритма
+    const algorithmCode = {
+        bubble: [
+            { line: 1, code: 'public SortResult bubbleSortByPower(List<Car> cars) {' },
+            { line: 2, code: '    List<SortStep> steps = new ArrayList<>();' },
+            { line: 3, code: '    List<Car> sorted = new ArrayList<>(cars);' },
+            { line: 4, code: '    int n = sorted.size();' },
+            { line: 5, code: '' },
+            { line: 6, code: '    steps.add(...); // Инициализация' },
+            { line: 7, code: '' },
+            { line: 8, code: '    for (int i = 0; i < n - 1; i++) {' },
+            { line: 9, code: '' },
+            { line: 10, code: '        for (int j = 0; j < n - i - 1; j++) {' },
+            { line: 11, code: '' },
+            { line: 12, code: '            if (sorted.get(j).getPower() > sorted.get(j+1).getPower()) {' },
+            { line: 13, code: '' },
+            { line: 14, code: '                Car temp = sorted.get(j);' },
+            { line: 15, code: '                sorted.set(j, sorted.get(j + 1));' },
+            { line: 16, code: '                sorted.set(j + 1, temp);' },
+            { line: 17, code: '            }' },
+            { line: 18, code: '        }' },
+            { line: 19, code: '    }' },
+            { line: 20, code: '' },
+            { line: 21, code: '    return new SortResult(steps, "Bubble Sort");' },
+            { line: 22, code: '}' }
+        ],
+        selection: [
+            { line: 1, code: 'public SortResult selectionSortByPower(List<Car> cars) {' },
+            { line: 2, code: '    List<SortStep> steps = new ArrayList<>();' },
+            { line: 3, code: '    List<Car> sorted = new ArrayList<>(cars);' },
+            { line: 4, code: '    int n = sorted.size();' },
+            { line: 5, code: '' },
+            { line: 6, code: '    for (int i = 0; i < n - 1; i++) {' },
+            { line: 7, code: '        int minIdx = i;' },
+            { line: 8, code: '' },
+            { line: 9, code: '        for (int j = i + 1; j < n; j++) {' },
+            { line: 10, code: '' },
+            { line: 11, code: '            if (sorted.get(j).getPower() < sorted.get(minIdx).getPower()) {' },
+            { line: 12, code: '                minIdx = j;' },
+            { line: 13, code: '            }' },
+            { line: 14, code: '        }' },
+            { line: 15, code: '' },
+            { line: 16, code: '        if (minIdx != i) {' },
+            { line: 17, code: '            Car temp = sorted.get(minIdx);' },
+            { line: 18, code: '            sorted.set(minIdx, sorted.get(i));' },
+            { line: 19, code: '            sorted.set(i, temp);' },
+            { line: 20, code: '        }' },
+            { line: 21, code: '    }' },
+            { line: 22, code: '' },
+            { line: 23, code: '    return new SortResult(steps, "Selection Sort");' },
+            { line: 24, code: '}' }
+        ],
+        insertion: [
+            { line: 1, code: 'public SortResult insertionSortByPower(List<Car> cars) {' },
+            { line: 2, code: '    List<SortStep> steps = new ArrayList<>();' },
+            { line: 3, code: '    List<Car> sorted = new ArrayList<>(cars);' },
+            { line: 4, code: '    int n = sorted.size();' },
+            { line: 5, code: '' },
+            { line: 6, code: '    for (int i = 1; i < n; i++) {' },
+            { line: 7, code: '        Car key = sorted.get(i);' },
+            { line: 8, code: '        int j = i - 1;' },
+            { line: 9, code: '' },
+            { line: 10, code: '        while (j >= 0 && sorted.get(j).getPower() > key.getPower()) {' },
+            { line: 11, code: '            sorted.set(j + 1, sorted.get(j));' },
+            { line: 12, code: '            j--;' },
+            { line: 13, code: '        }' },
+            { line: 14, code: '' },
+            { line: 15, code: '        sorted.set(j + 1, key);' },
+            { line: 16, code: '    }' },
+            { line: 17, code: '' },
+            { line: 18, code: '    return new SortResult(steps, "Insertion Sort");' },
+            { line: 19, code: '}' }
+        ]
+    };
+
+    const algorithmNames = {
+        bubble: 'Bubble Sort (Сортировка пузырьком)',
+        selection: 'Selection Sort (Сортировка выбором)',
+        insertion: 'Insertion Sort (Сортировка вставками)'
+    };
+
+    // Загрузка автомобилей
+    async function loadCars() {
+        try {
+            const response = await fetch('/api/cars');
+            cars = await response.json();
+            displayCars();
+            showStepDescription('✅ Автомобили загружены. Выберите алгоритм сортировки.');
+        } catch (error) {
+            showStepDescription('❌ Ошибка загрузки: ' + error.message);
+        }
+    }
+
+    // Отображение автомобилей
+    function displayCars() {
+        const carList = document.getElementById('carList');
+        carList.innerHTML = '';
+
+        cars.forEach(car => {
+            const card = document.createElement('div');
+            card.className = 'car-card';
+            card.innerHTML = `
+                    <h3>🚗 ${car.model}</h3>
+                    <p><strong>Мощность:</strong> ${car.power} л.с.</p>
+                    <p><strong>Год:</strong> ${car.year}</p>
+                `;
+            carList.appendChild(card);
+        });
+    }
+
+    // Начать сортировку
+    async function startSort(algorithm) {
+        currentAlgorithm = algorithm;
+        stopPlay();
+
+        try {
+            const response = await fetch(`/api/cars/sort/${algorithm}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cars)
+            });
+
+            const result = await response.json();
+            currentSteps = result.steps;
+            currentStepIndex = 0;
+
+            // Показать информацию об алгоритме
+            const info = document.getElementById('algorithmInfo');
+            info.textContent = '📊 ' + result.algorithmName;
+            info.style.display = 'block';
+
+            // Включить кнопки управления
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+
+            // Показать первый шаг
+            showStep(0);
+
+        } catch (error) {
+            showStepDescription('❌ Ошибка: ' + error.message);
+        }
+    }
+
+    // Показать шаг
+    function showStep(index) {
+        if (index >= currentSteps.length) {
+            stopPlay();
+            showStepDescription('🎉 Сортировка завершена!');
+            return;
+        }
+
+        const step = currentSteps[index];
+        currentStepIndex = index;
+
+        // Обновить описание
+        showStepDescription(step.description);
+
+        // Обновить автомобили
+        if (step.state) {
+            cars = step.state;
+            displayCars();
+        }
+
+        // Подсветить код
+        highlightCode(step.lineNumber);
+
+        // Обновить прогресс
+        const progress = ((index + 1) / currentSteps.length) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+
+    // Подсветка кода
+    function highlightCode(lineNumber) {
+        const codePanel = document.getElementById('codePanel');
+        const code = algorithmCode[currentAlgorithm];
+
+        codePanel.innerHTML = '';
+
+        code.forEach(item => {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'code-line';
+
+            if (item.line === lineNumber) {
+                lineDiv.classList.add('active');
+            }
+
+            lineDiv.innerHTML = `
+                    <span class="line-number">${item.line}</span>
+                    <span>${escapeHtml(item.code)}</span>
+                `;
+
+            codePanel.appendChild(lineDiv);
+        });
+
+        // Прокрутка к активной строке
+        setTimeout(() => {
+            const activeLine = document.querySelector('.code-line.active');
+            if (activeLine) {
+                activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+
+    // Play/Pause
+    function togglePlay() {
+        if (isPlaying) {
+            stopPlay();
+        } else {
+            startPlay();
+        }
+    }
+
+    function startPlay() {
+        isPlaying = true;
+        document.getElementById('playBtn').textContent = '️ Pause';
+
+        playInterval = setInterval(() => {
+            if (currentStepIndex < currentSteps.length - 1) {
+                showStep(currentStepIndex + 1);
+            } else {
+                stopPlay();
+            }
+        }, speed);
+    }
+
+    function stopPlay() {
+        isPlaying = false;
+        document.getElementById('playBtn').textContent = '▶️ Play';
+        if (playInterval) {
+            clearInterval(playInterval);
+            playInterval = null;
+        }
+    }
+
+    // Следующий шаг
+    function nextStep() {
+        stopPlay();
+        if (currentStepIndex < currentSteps.length - 1) {
+            showStep(currentStepIndex + 1);
+        }
+    }
+
+    // Сброс
+    function resetSort() {
+        stopPlay();
+        currentStepIndex = 0;
+        document.getElementById('progressFill').style.width = '0%';
+        showStepDescription('Нажмите Play или Шаг для начала...');
+        document.getElementById('codePanel').innerHTML = '';
+    }
+
+    // Скорость
+    function setSpeed(newSpeed) {
+        speed = newSpeed;
+        document.querySelectorAll('.speed-control button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        if (speed === 1000) document.getElementById('slowBtn').classList.add('active');
+        else if (speed === 500) document.getElementById('normalBtn').classList.add('active');
+        else if (speed === 100) document.getElementById('fastBtn').classList.add('active');
+
+        // Если сейчас играет, перезапустить с новой скоростью
+        if (isPlaying) {
+            stopPlay();
+            startPlay();
+        }
+    }
+
+    // Показать описание шага
+    function showStepDescription(text) {
+        document.getElementById('stepDescription').textContent = text;
+    }
+
+    // Добавление автомобиля
+    function addCar() {
+        const model = document.getElementById('carModel').value;
+        const power = parseInt(document.getElementById('carPower').value);
+        const year = parseInt(document.getElementById('carYear').value);
+
+        if (!model || !power || !year) {
+            showStepDescription('❌ Заполните все поля');
+            return;
+        }
+
+        cars.push({
+            id: cars.length + 1,
+            model: model,
+            power: power,
+            year: year
+        });
+
+        displayCars();
+        showStepDescription('✅ Автомобиль добавлен');
+
+        document.getElementById('carModel').value = '';
+        document.getElementById('carPower').value = '';
+        document.getElementById('carYear').value = '';
+    }
+
+    // Экранирование HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Загрузить при старте
+    window.onload = loadCars;
+</script>
+</body>
+</html>
