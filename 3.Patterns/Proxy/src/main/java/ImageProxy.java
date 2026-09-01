@@ -1,27 +1,32 @@
 public class ImageProxy implements Image {
-	private String fileName;
-	private RealImage realImage;
+    
+    private final String fileName;
+    
+    // ВАЖНО: Это поле НЕ может быть final, так как используется 
+    // ленивая инициализация (Lazy Initialization). 
+    // Объект создается только при первом вызове display().
+    private RealImage realImage;
 
-	public ImageProxy(String fileName) {
-		this.fileName = fileName;
-	}
+    public ImageProxy(String fileName) {
+        this.fileName = fileName;
+    }
 
-	@Override
-	public void display() {
-		System.out.println("📋 Запрос на отображение: " + fileName);
+    @Override
+    public void display() {
+        System.out.println("📋 Запрос на отображение: " + fileName);
 
-		if (realImage == null) {
-			System.out.println("    Реальное изображение ещё не загружено, создаём...");
-			realImage = new RealImage(fileName);
-		} else {
-			System.out.println("   🔹 Изображение уже в кэше, используем его!");
-		}
+        if (realImage == null) {
+            System.out.println("    Реальное изображение ещё не загружено, создаём...");
+            realImage = new RealImage(fileName);
+        } else {
+            System.out.println("   🔹 Изображение уже в кэше, используем его!");
+        }
 
-		realImage.display();
-	}
+        realImage.display();
+    }
 
-	@Override
-	public String getFileName() {
-		return fileName;
-	}
+    @Override
+    public String getFileName() {
+        return fileName;
+    }
 }

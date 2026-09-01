@@ -1,4 +1,6 @@
+import java.math.BigDecimal;
+
 public interface PaymentStrategy {
-	boolean pay(double amount);
-	String getMethodName();
+    boolean pay(BigDecimal amount);
+    String getMethodName();
 }

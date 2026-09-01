@@ -1,39 +1,47 @@
+package com.HomeWork;
+
+import java.math.BigDecimal;
+
 public class CryptoPaymentAdapter implements PaymentProcessor {
-	private CryptoPaymentGateway cryptoGateway;
-	private String walletAddress;
-	private String lastTransactionId;
-	private String status = "Ожидание";
 
-	public CryptoPaymentAdapter(String walletAddress) {
-		this.cryptoGateway = new CryptoPaymentGateway();
-		this.walletAddress = walletAddress;
-	}
+    private static final String STATUS_PENDING = "Ожидание";
+    private static final String STATUS_CONFIRMED = "CONFIRMED";
+    private static final String STATUS_SUCCESS_PREFIX = "Оплачено криптовалютой (TX: ";
+    private static final String STATUS_ERROR = "Ошибка оплаты криптовалютой";
 
-	@Override
-	public boolean pay(double amount, String currency) {
+    private final CryptoPaymentGateway cryptoGateway;
+    private final String walletAddress;
+    private String lastTransactionId;
+    private String status = STATUS_PENDING;
 
-		System.out.println("🔌 Адаптер: конвертируем вызов pay() в sendCrypto()...");
+    public CryptoPaymentAdapter(String walletAddress) {
+        this.cryptoGateway = new CryptoPaymentGateway();
+        this.walletAddress = walletAddress;
+    }
 
-		CryptoPaymentGateway.TransactionResult result =
-			cryptoGateway.sendCrypto(amount, walletAddress);
+    @Override
+    public boolean pay(BigDecimal amount, String currency) {
+        System.out.println("🔌 Адаптер: конвертируем вызов pay() в sendCrypto()...");
 
-		lastTransactionId = result.getTransactionId();
+        CryptoPaymentGateway.TransactionResult result =
+                cryptoGateway.sendCrypto(amount, walletAddress);
 
-		if ("CONFIRMED".equals(result.getStatus())) {
-			status = "Оплачено криптовалютой (TX: " + lastTransactionId + ")";
-			return true;
-		} else {
-			status = "Ошибка оплаты криптовалютой";
-			return false;
-		}
-	}
+        lastTransactionId = result.getTransactionId();
 
-	@Override
-	public String getPaymentStatus() {
+        if (STATUS_CONFIRMED.equals(result.getStatus())) {
+            status = STATUS_SUCCESS_PREFIX + lastTransactionId + ")";
+            return true;
+        } else {
+            status = STATUS_ERROR;
+            return false;
+        }
+    }
 
-		if (lastTransactionId != null) {
-			return cryptoGateway.checkTransaction(lastTransactionId);
-		}
-		return status;
-	}
+    @Override
+    public String getPaymentStatus() {
+        if (lastTransactionId != null) {
+            return cryptoGateway.checkTransaction(lastTransactionId);
+        }
+        return status;
+    }
 }

@@ -1,8 +1,0 @@
-Main.class
-TelegramNotifierDecorator.class
-Notifier.class
-EncryptionDecorator.class
-SmsNotifierDecorator.class
-LoggingDecorator.class
-EmailNotifier.class
-NotifierDecorator.class

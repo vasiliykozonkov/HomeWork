@@ -1,4 +1,6 @@
 public interface Image {
-	void display();
-	String getFileName();
+    
+    void display();
+    
+    String getFileName();
 }

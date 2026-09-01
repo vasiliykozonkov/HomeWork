@@ -1,9 +1,14 @@
+import java.math.BigDecimal;
+
 public class CryptoPayment implements PaymentStrategy {
-	public boolean pay(double amount) {
-		System.out.println("    ₿ Оплата криптовалютой: " + String.format("%.2f", amount) + " руб.");
-		return true;
-	}
-	public String getMethodName() {
-		return "Криптовалюта";
-	}
+    @Override
+    public boolean pay(BigDecimal amount) {
+        System.out.println("    ₿ Оплата криптовалютой: " + amount + " руб.");
+        return true;
+    }
+
+    @Override
+    public String getMethodName() {
+        return "Криптовалюта";
+    }
 }
