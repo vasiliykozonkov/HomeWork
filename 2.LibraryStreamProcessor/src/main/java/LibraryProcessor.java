@@ -1,31 +1,31 @@
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-// FIXME: Add logging
-// TODO: Add statistics
+
 public class LibraryProcessor {
 
-    private static final int MIN_YEAR = 2000;
-    private static final int BOOKS_LIMIT = 3;
+	private static final int MIN_YEAR = 2000;
+	private static final int BOOKS_LIMIT = 3;
 
-    public void printStudentsAndBooks(List<Student> students) {
-        students.forEach(student -> {
-            System.out.println(student);
-            student.getBooks().stream()
-                    .distinct()
-                    .filter(book -> book.getYear() > MIN_YEAR)
-                    .sorted((b1, b2) -> Integer.compare(b1.getPages(), b2.getPages()))
-                    .forEach(book -> System.out.println("Книга: " + book));
-        });
-    }
-
-    public Optional<Integer> findFirstBookYear(List<Student> students) {
-        return students.stream()
-                .flatMap(student -> student.getBooks().stream())
-                .sorted((b1, b2) -> Integer.compare(b1.getPages(), b2.getPages()))
-                .distinct()
-                .filter(book -> book.getYear() > MIN_YEAR)
-                .limit(BOOKS_LIMIT)
-                .map(Book::getYear)
-                .findFirst();
-    }
+	public void processLibrary(List<Student> students) {
+		students.stream()
+		.peek(student -> {
+			System.out.println(student);
+			student.getBooks().stream()
+			.sorted(Comparator.comparingInt(Book::getPages))
+			.filter(book -> book.getYear() > MIN_YEAR)
+			.forEach(book -> System.out.println("   📚 " + book));
+		})
+		.map(Student::getBooks)
+		.flatMap(java.util.Collection::stream)
+		.sorted(Comparator.comparingInt(Book::getPages))
+		.distinct()
+		.filter(book -> book.getYear() > MIN_YEAR)
+		.limit(BOOKS_LIMIT)
+		.map(Book::getYear)
+		.findFirst()
+		.ifPresentOrElse(
+			year -> System.out.println("\nГод выпуска найденной книги: " + year),
+			() -> System.out.println("Такая книга отсутствует")
+		);
+	}
 }
