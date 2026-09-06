@@ -1,72 +1,53 @@
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DeadLockWithTimeout {
-    private static final ReentrantLock lockA = new ReentrantLock();
-    private static final ReentrantLock lockB = new ReentrantLock();
+	private static final ReentrantLock LOCK_A = new ReentrantLock();
+	private static final ReentrantLock LOCK_B = new ReentrantLock();
+	private static final long SLEEP_MS = 100;
+	private static final long TIMEOUT_SECONDS = 2;
 
-    public static void main(String[] args) throws InterruptedException {
-        System.out.println("⏳ DEADLOCK с таймаутом (ReentrantLock)");
-        System.out.println("Потоки будут пытаться захватить ресурсы, но сдадутся через 2 секунды.\n");
+	public static void main(String[] args) throws InterruptedException {
+		System.out.println("[INFO] DEADLOCK с таймаутом (ReentrantLock)");
+		System.out.println("Потоки будут пытаться захватить ресурсы, но сдадутся через " + TIMEOUT_SECONDS + " сек.\n");
 
-        Thread thread1 = new Thread(() -> {
-            try {
-                System.out.println("Поток 1: захватываю Lock A...");
-                lockA.lock(); // Захватываем первый замок
-                System.out.println("Поток 1: Lock A захвачен!");
-                Thread.sleep(100); // Имитация работы
+		Thread thread1 = createThread("Поток 1", LOCK_A, LOCK_B);
+		Thread thread2 = createThread("Поток 2", LOCK_B, LOCK_A);
 
-                System.out.println("Поток 1: пытаюсь захватить Lock B (жду 2 сек)...");
-                boolean gotLockB = lockB.tryLock(2, TimeUnit.SECONDS);
+		thread1.start();
+		thread2.start();
 
-                if (gotLockB) {
-                    System.out.println("Поток 1: Lock B захвачен! Работа выполнена.");
-                    lockB.unlock();
-                } else {
-                    System.out.println("Поток 1: не смог захватить Lock B за 2 сек. Отменяю операцию!");
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } finally {
-                if (lockA.isHeldByCurrentThread()) {
-                    lockA.unlock();
-                    System.out.println("Поток 1: освободил Lock A");
-                }
-            }
-        });
+		thread1.join();
+		thread2.join();
 
-        Thread thread2 = new Thread(() -> {
-            try {
-                System.out.println("Поток 2: захватываю Lock B...");
-                lockB.lock();
-                System.out.println("Поток 2: Lock B захвачен!");
-                Thread.sleep(100); // Имитация работы
+		System.out.println("\n[INFO] Программа успешно завершена без вечного зависания!");
+	}
 
-                System.out.println("Поток 2: пытаюсь захватить Lock A (жду 2 сек)...");
-                boolean gotLockA = lockA.tryLock(2, TimeUnit.SECONDS);
+	private static Thread createThread(String name, ReentrantLock firstLock, ReentrantLock secondLock) {
+		return new Thread(() -> {
+			try {
+				System.out.println(name + ": захватываю " + firstLock + "...");
+				firstLock.lock();
+				System.out.println(name + ": " + firstLock + " захвачен!");
+				Thread.sleep(SLEEP_MS);
 
-                if (gotLockA) {
-                    System.out.println("Поток 2: Lock A захвачен! Работа выполнена.");
-                    lockA.unlock();
-                } else {
-                    System.out.println("Поток 2: не смог захватить Lock A за 2 сек. Отменяю операцию!");
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } finally {
-                if (lockB.isHeldByCurrentThread()) {
-                    lockB.unlock();
-                    System.out.println("Поток 2: освободил Lock B");
-                }
-            }
-        });
+				System.out.println(name + ": пытаюсь захватить " + secondLock + " (жду " + TIMEOUT_SECONDS + " сек)...");
+				boolean gotLock = secondLock.tryLock(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        thread1.start();
-        thread2.start();
-
-        thread1.join();
-        thread2.join();
-        
-        System.out.println("\n✅ Программа успешно завершена без вечного зависания!");
-    }
+				if (gotLock) {
+					System.out.println(name + ": " + secondLock + " захвачен! Работа выполнена.");
+					secondLock.unlock();
+				} else {
+					System.out.println(name + ": не смог захватить " + secondLock + " за " + TIMEOUT_SECONDS + " сек. Отменяю операцию!");
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} finally {
+				if (firstLock.isHeldByCurrentThread()) {
+					firstLock.unlock();
+					System.out.println(name + ": освободил " + firstLock);
+				}
+			}
+		}, name);
+	}
 }
