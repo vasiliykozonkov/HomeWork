@@ -1,6 +1,5 @@
 import java.util.List;
-// FIXME: Main application entry point
-// TODO: Add error handling
+
 public class Student {
 	private String name;
 	private int age;

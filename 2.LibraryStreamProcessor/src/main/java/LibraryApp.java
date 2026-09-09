@@ -1,7 +1,5 @@
 import java.util.List;
-import java.util.Optional;
-// FIXME: Main application entry point
-// TODO: Add error handling
+
 public class LibraryApp {
 	public static void main(String[] args) {
 		FileReaderService readerService = new FileReaderService();
@@ -9,14 +7,6 @@ public class LibraryApp {
 
 		List<Student> students = readerService.readStudents();
 
-		processor.printStudentsAndBooks(students);
-
-		Optional<Integer> resultYear = processor.findFirstBookYear(students);
-
-		System.out.println("\n=== РЕЗУЛЬТАТ ===");
-		resultYear.ifPresentOrElse(
-				year -> System.out.println("Год выпуска найденной книги: " + year),
-				() -> System.out.println("Такая книга отсутствует")
-		);
+		processor.processLibrary(students);
 	}
 }
