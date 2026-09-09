@@ -1,85 +1,66 @@
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class LiveLockWithTryLock {
-    private static final ReentrantLock lockA = new ReentrantLock();
-    private static final ReentrantLock lockB = new ReentrantLock();
-    private static final Random random = new Random();
+	private static final ReentrantLock LOCK_A = new ReentrantLock();
+	private static final ReentrantLock LOCK_B = new ReentrantLock();
+	private static final int MAX_ATTEMPTS = 10;
+	private static final int SLEEP_MS = 50;
+	private static final Random RANDOM = new Random();
 
-    public static void main(String[] args) throws InterruptedException {
-        System.out.println("🟡 LIVELOCK через ReentrantLock.tryLock() с откатом");
-        System.out.println("Потоки пытаются захватить ресурсы, но при неудаче откатываются и пробуют снова.\n");
+	public static void main(String[] args) throws InterruptedException {
+		System.out.println("[INFO] LIVELOCK через ReentrantLock.tryLock() с откатом");
+		System.out.println("Потоки пытаются захватить ресурсы, но при неудаче откатываются.\n");
 
-        Thread thread1 = new Thread(() -> {
-            int attempts = 0;
-            while (attempts < 10) {
-                attempts++;
-                System.out.println("Поток 1: Попытка №" + attempts + ". Пробую захватить Lock A...");
-                
-                if (lockA.tryLock()) {
-                    try {
-                        System.out.println("Поток 1: Lock A захвачен. Пробую захватить Lock B...");
-                        
-                        try { Thread.sleep(50); } catch (InterruptedException e) { return; }
+		Thread thread1 = createThread("Поток 1", LOCK_A, LOCK_B);
+		Thread thread2 = createThread("Поток 2", LOCK_B, LOCK_A);
 
-                        if (lockB.tryLock()) {
-                            try {
-                                System.out.println("Поток 1: Lock B захвачен! Работа выполнена!");
-                                return;
-                            } finally {
-                                lockB.unlock();
-                            }
-                        } else {
-                            System.out.println("Поток 1: Не смог захватить Lock B. Откатываюсь...");
-                        }
-                    } finally {
-                        lockA.unlock();
-                    }
-                }
-                
-                try { Thread.sleep(random.nextInt(50)); } catch (InterruptedException e) { return; }
-            }
-            System.out.println("Поток 1: Лимит попыток исчерпан.");
-        });
+		thread1.start();
+		thread2.start();
 
-        Thread thread2 = new Thread(() -> {
-            int attempts = 0;
-            while (attempts < 10) {
-                attempts++;
-                System.out.println("Поток 2: Попытка №" + attempts + ". Пробую захватить Lock B...");
-                
-                if (lockB.tryLock()) {
-                    try {
-                        System.out.println("Поток 2: Lock B захвачен. Пробую захватить Lock A...");
-                        
-                        try { Thread.sleep(50); } catch (InterruptedException e) { return; }
+		thread1.join();
+		thread2.join();
 
-                        if (lockA.tryLock()) {
-                            try {
-                                System.out.println("Поток 2: Lock A захвачен! Работа выполнена!");
-                                return;
-                            } finally {
-                                lockA.unlock();
-                            }
-                        } else {
-                            System.out.println("Поток 2: Не смог захватить Lock A. Откатываюсь...");
-                        }
-                    } finally {
-                        lockB.unlock();
-                    }
-                }
-                
-                try { Thread.sleep(random.nextInt(50)); } catch (InterruptedException e) { return; }
-            }
-            System.out.println("Поток 2: Лимит попыток исчерпан.");
-        });
+		System.out.println("\n[INFO] Программа завершена. Полезная работа не выполнена из-за постоянных откатов.");
+	}
 
-        thread1.start();
-        thread2.start();
+	private static Thread createThread(String name, ReentrantLock firstLock, ReentrantLock secondLock) {
+		return new Thread(() -> {
+			int attempts = 0;
+			while (attempts < MAX_ATTEMPTS) {
+				attempts++;
+				System.out.println(name + ": Попытка №" + attempts + ". Пробую захватить " + firstLock + "...");
 
-        thread1.join();
-        thread2.join();
-        
-        System.out.println("\n✅ Программа завершена. Полезная работа не выполнена из-за постоянных откатов (LiveLock)!");
-    }
+				if (firstLock.tryLock()) {
+					try {
+						System.out.println(name + ": " + firstLock + " захвачен. Пробую захватить " + secondLock + "...");
+						try {
+							Thread.sleep(SLEEP_MS);
+						} catch (InterruptedException e) {
+							return;
+						}
+
+						if (secondLock.tryLock()) {
+							try {
+								System.out.println("[SUCCESS] " + name + ": " + secondLock + " захвачен! Работа выполнена!");
+								return;
+							} finally {
+								secondLock.unlock();
+							}
+						} else {
+							System.out.println(name + ": Не смог захватить " + secondLock + ". Откатываюсь...");
+						}
+					} finally {
+						firstLock.unlock();
+					}
+				}
+				try {
+					Thread.sleep(RANDOM.nextInt(SLEEP_MS));
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+			System.out.println(name + ": Лимит попыток исчерпан.");
+		}, name);
+	}
 }
